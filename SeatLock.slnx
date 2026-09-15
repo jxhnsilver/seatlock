@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Seating.Api/Seating.Api.csproj" Id="c5dc550e-bae1-4fed-a307-dd13a5beaedd" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Seating.Api.UnitTests/Seating.Api.UnitTests.csproj" Id="9413d0ff-f921-4a79-b71a-ff31b26cea54" />
+  </Folder>
 </Solution>

@@ -38,10 +38,10 @@ namespace Seating.Api.Entities
                 throw new ArgumentException("Идентификатор зала должен быть больше нуля.", nameof(hallId));
 
             if (rowNumber <= 0)
-                throw new ArgumentOutOfRangeException(nameof(rowNumber), "Номер ряда должен быть больше нуля.");
+                throw new ArgumentException("Номер ряда должен быть больше нуля.", nameof(rowNumber));
 
             if (seatNumber <= 0)
-                throw new ArgumentOutOfRangeException(nameof(seatNumber), "Номер места должен быть больше нуля.");
+                throw new ArgumentException("Номер места должен быть больше нуля.", nameof(seatNumber));
 
             HallId = hallId;
             RowNumber = rowNumber;

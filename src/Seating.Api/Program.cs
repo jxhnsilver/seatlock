@@ -9,6 +9,12 @@ builder.Services.AddDbContext<SeatingDbContext>(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SeatingDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 app.MapGet("/", () => "Hello! I'm Seating service.");
 
 app.Run();

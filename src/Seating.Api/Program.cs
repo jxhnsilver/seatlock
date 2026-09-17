@@ -1,3 +1,5 @@
+using BuildingBlocks.ErrorHandling;
+using BuildingBlocks.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Seating.Api.Data;
 
@@ -7,7 +9,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<SeatingDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddErrorHandling();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
 {

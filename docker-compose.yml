@@ -1,6 +1,8 @@
 services:
   seating-api:
-    build: ./src/Seating.Api
+    build:
+      context: .
+      dockerfile: ./src/Seating.Api/Dockerfile
     image: seating-api:local
     ports:
       - "8080:8080"

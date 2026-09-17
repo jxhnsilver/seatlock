@@ -1,6 +1,4 @@
-﻿using Seating.Api.Enums;
-
-namespace Seating.Api.Entities
+﻿namespace Seating.Api.Domain.Halls
 {
     /// <summary>
     /// Доменная сущность кинозала.

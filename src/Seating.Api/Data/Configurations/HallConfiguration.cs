@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Seating.Api.Entities;
+using Seating.Api.Domain.Halls;
 
 namespace Seating.Api.Data.Configurations
 {

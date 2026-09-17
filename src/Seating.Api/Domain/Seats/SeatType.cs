@@ -1,4 +1,4 @@
-﻿namespace Seating.Api.Enums
+﻿namespace Seating.Api.Domain.Seats
 {
     /// <summary>
     /// Тип посадочного места в кинозале.

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Seating.Api.Entities;
+using Seating.Api.Domain.Halls;
+using Seating.Api.Domain.Seats;
 
 namespace Seating.Api.Data
 {

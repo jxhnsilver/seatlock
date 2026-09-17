@@ -1,4 +1,4 @@
-﻿namespace Seating.Api.Enums
+﻿namespace Seating.Api.Domain.Halls
 {
     /// <summary>
     /// Определяет операционный статус кинозала.

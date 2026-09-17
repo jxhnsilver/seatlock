@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
+using Seating.Api.Domain.Halls;
 using Seating.Api.Entities;
-using Seating.Api.Enums;
 
 namespace Seating.Api.UnitTests.Entities
 {

@@ -15,10 +15,10 @@ namespace BuildingBlocks.ErrorHandling
         {
             var (status, title, type) = exception switch
             {
-                NotFoundException => (StatusCodes.Status404NotFound, "Not found", "https://tools.ietf.org/html/rfc7231#section-6.5.4"),
-                ConflictException => (StatusCodes.Status409Conflict, "Conflict", "https://tools.ietf.org/html/rfc7231#section-6.5.8"),
-                BusinessRuleException => (StatusCodes.Status400BadRequest, "Bad request", "https://tools.ietf.org/html/rfc7231#section-6.5.1"),
-                _ => (StatusCodes.Status500InternalServerError, "Internal server error", "https://tools.ietf.org/html/rfc7231#section-6.6.1")
+                NotFoundException => (StatusCodes.Status404NotFound, "Resource not found", "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"),
+                BusinessRuleException => (StatusCodes.Status422UnprocessableEntity, "Business rule violation", "https://datatracker.ietf.org/doc/html/rfc4918#section-11.2"),
+                ConflictException => (StatusCodes.Status409Conflict, "Resource conflict", "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8"),
+                _ => (StatusCodes.Status500InternalServerError, "Internal server error", "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1")
             };
 
             context.Response.StatusCode = status;

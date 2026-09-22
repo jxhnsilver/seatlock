@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Seating.Api.Data;
 using Seating.Api.Domain.Halls;
+using Seating.Api.Domain.Seats;
 using Seating.Api.Dtos;
 using Seating.Api.Services;
 
@@ -49,6 +50,25 @@ namespace Seating.Api.UnitTests.Services
         }
 
         [Fact]
+        public async Task UpdateAsync_ShouldUpdateHallDetails()
+        {
+            await using var db = CreateContext();
+            var hall = new Hall("Old Hall", HallType.Standard);
+            db.Halls.Add(hall);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var service = new HallService(db);
+            var dto = new UpdateHallDto("New Hall", HallType.Imax);
+
+            await service.UpdateAsync(hall.Id, dto, TestContext.Current.CancellationToken);
+
+            var updated = await db.Halls.FindAsync([hall.Id], TestContext.Current.CancellationToken);
+            updated!.Name.Should().Be(dto.Name);
+            updated.Type.Should().Be(dto.Type);
+            updated.Status.Should().Be(HallStatus.Active);
+        }
+
+        [Fact]
         public async Task GetAllAsync_ShouldReturnAllHalls()
         {
             // Arrange
@@ -67,6 +87,28 @@ namespace Seating.Api.UnitTests.Services
             // Assert
             result.Should().HaveCount(2);
             result.Select(r => r.Name).Should().Contain(ExpectedHallNames);
+        }
+
+        [Fact]
+        public async Task GetActiveAsync_ShouldReturnOnlyActiveHalls()
+        {
+            await using var db = CreateContext();
+            var activeHall = new Hall("Active Hall", HallType.Standard);
+            var maintenanceHall = new Hall("Maintenance Hall", HallType.Standard);
+            maintenanceHall.ChangeStatus(HallStatus.Maintenance);
+            var inactiveHall = new Hall("Inactive Hall", HallType.Standard);
+            inactiveHall.ChangeStatus(HallStatus.Inactive);
+
+            db.Halls.AddRange(activeHall, maintenanceHall, inactiveHall);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var service = new HallService(db);
+
+            var result = await service.GetActiveAsync(TestContext.Current.CancellationToken);
+
+            result.Should().ContainSingle();
+            result[0].Id.Should().Be(activeHall.Id);
+            result[0].Status.Should().Be(HallStatus.Active);
         }
 
         [Fact]
@@ -106,22 +148,150 @@ namespace Seating.Api.UnitTests.Services
         }
 
         [Fact]
-        public async Task DeleteAsync_ShouldRemoveEntity()
+        public async Task ChangeStatusAsync_ShouldUpdateHallStatus()
         {
-            // Arrange
             await using var db = CreateContext();
-            var hall = new Hall("ToDelete", HallType.Standard);
+            var hall = new Hall("Hall", HallType.Standard);
             db.Halls.Add(hall);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var service = new HallService(db);
 
+            await service.ChangeStatusAsync(
+                hall.Id,
+                new ChangeHallStatusDto(HallStatus.Inactive),
+                TestContext.Current.CancellationToken);
+
+            var updated = await db.Halls.FindAsync([hall.Id], TestContext.Current.CancellationToken);
+            updated!.Status.Should().Be(HallStatus.Inactive);
+        }
+
+        [Fact]
+        public async Task GetLayoutAsync_WhenExists_ShouldReturnHallLayout()
+        {
+            // Arrange
+            await using var db = CreateContext();
+            var hall = new Hall("Layout Hall", HallType.Standard);
+            db.Halls.Add(hall);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            db.Seats.AddRange(
+                new Seat(hall.Id, 2, 1, SeatType.Double),
+                new Seat(hall.Id, 1, 3, SeatType.Single)
+            );
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var service = new HallService(db);
+
             // Act
-            await service.DeleteAsync(hall.Id, TestContext.Current.CancellationToken);
+            var layout = await service.GetLayoutAsync(hall.Id, TestContext.Current.CancellationToken);
 
             // Assert
-            var exists = await db.Halls.AnyAsync(h => h.Id == hall.Id, TestContext.Current.CancellationToken);
-            exists.Should().BeFalse();
+            layout.HallId.Should().Be(hall.Id);
+            layout.HallName.Should().Be(hall.Name);
+            layout.Seats.Should().HaveCount(2);
+            layout.Seats[0].RowNumber.Should().Be(1);
+            layout.Seats[0].SeatNumber.Should().Be(3);
+            layout.Seats[0].Type.Should().Be(SeatType.Single);
+            layout.Seats[1].RowNumber.Should().Be(2);
+            layout.Seats[1].SeatNumber.Should().Be(1);
+            layout.Seats[1].Type.Should().Be(SeatType.Double);
+        }
+
+        [Fact]
+        public async Task GetLayoutAsync_WhenHallNotFound_ShouldThrowNotFoundException()
+        {
+            // Arrange
+            await using var db = CreateContext();
+            var service = new HallService(db);
+
+            // Act
+            var act = async () => await service.GetLayoutAsync(999, TestContext.Current.CancellationToken);
+
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task SetLayoutAsync_ShouldReplaceExistingSeats()
+        {
+            // Arrange
+            await using var db = CreateContext();
+            var hall = new Hall("Layout Hall", HallType.Standard);
+            db.Halls.Add(hall);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            db.Seats.AddRange(
+                new Seat(hall.Id, 1, 1, SeatType.Single),
+                new Seat(hall.Id, 1, 2, SeatType.Single)
+            );
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var service = new HallService(db);
+
+            var newLayout = new CreateSeatLayoutDto(new List<CreateSeatDto>
+            {
+                new(2, 1, SeatType.Double),
+                new(2, 2, SeatType.Single),
+                new(3, 1, SeatType.Single)
+            });
+
+            // Act
+            await service.SetLayoutAsync(hall.Id, newLayout, TestContext.Current.CancellationToken);
+
+            // Assert
+            var seats = await db.Seats
+                .AsNoTracking()
+                .Where(s => s.HallId == hall.Id)
+                .OrderBy(s => s.RowNumber)
+                .ThenBy(s => s.SeatNumber)
+                .ToListAsync(TestContext.Current.CancellationToken);
+
+            seats.Should().HaveCount(3);
+            seats.Select(s => s.RowNumber).Should().ContainInOrder(2, 2, 3);
+            seats.Select(s => s.SeatNumber).Should().ContainInOrder(1, 2, 1);
+            seats.Select(s => s.Type).Should().ContainInOrder(SeatType.Double, SeatType.Single, SeatType.Single);
+
+            var oldSeatsExist = await db.Seats.AnyAsync(
+                s => s.HallId == hall.Id && s.RowNumber == 1,
+                TestContext.Current.CancellationToken);
+
+            oldSeatsExist.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task SetLayoutAsync_WhenHallNotFound_ShouldThrowNotFoundException()
+        {
+            // Arrange
+            await using var db = CreateContext();
+            var service = new HallService(db);
+
+            var newLayout = new CreateSeatLayoutDto(new List<CreateSeatDto>
+            {
+                new(1, 1, SeatType.Single)
+            });
+
+            // Act
+            var act = async () => await service.SetLayoutAsync(999, newLayout, TestContext.Current.CancellationToken);
+
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task SetLayoutAsync_WhenLayoutContainsDuplicateSeat_ShouldThrowBusinessRuleException()
+        {
+            await using var db = CreateContext();
+            var service = new HallService(db);
+            var layout = new CreateSeatLayoutDto(
+            [
+                new CreateSeatDto(1, 1, SeatType.Single),
+                new CreateSeatDto(1, 1, SeatType.Double)
+            ]);
+
+            var act = () => service.SetLayoutAsync(999, layout, TestContext.Current.CancellationToken);
+
+            await act.Should().ThrowAsync<BusinessRuleException>();
         }
     }
 }

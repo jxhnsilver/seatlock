@@ -18,7 +18,7 @@
         /// <summary>
         /// Текущий формат зала.
         /// </summary>
-        public HallType Type { get; init; }
+        public HallType Type { get; private set; }
 
         /// <summary>
         /// Текущий операционный статус зала.
@@ -45,6 +45,11 @@
                 throw new ArgumentException("Название зала не может быть пустым.", nameof(newName));
 
             Name = newName;
+        }
+
+        public void SetType(HallType newType)
+        {
+            Type = newType;
         }
 
         /// <summary>

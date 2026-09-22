@@ -39,6 +39,18 @@ namespace Seating.Api.Services
 
             await _db.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task ChangeStatusAsync(
+            int id,
+            ChangeHallStatusDto changeStatusDto,
+            CancellationToken cancellationToken = default)
+        {
+            var hall = await _db.Halls
+                .FirstOrDefaultAsync(h => h.Id == id, cancellationToken)
+                ?? throw new NotFoundException($"Hall with id {id} not found.");
+
+            hall.ChangeStatus(changeStatusDto.Status);
+            await _db.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<IReadOnlyList<HallDto>> GetAllAsync(CancellationToken cancellationToken = default)

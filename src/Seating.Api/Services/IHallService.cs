@@ -9,5 +9,7 @@ namespace Seating.Api.Services
         Task ChangeStatusAsync(int id, ChangeHallStatusDto changeStatusDto, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<HallDto>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<HallDto> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<HallLayoutDto> GetLayoutAsync(int hallId, CancellationToken cancellationToken = default);
+        Task SetLayoutAsync(int hallId, CreateSeatLayoutDto newSeatsDto, CancellationToken cancellationToken = default);
     }
 }

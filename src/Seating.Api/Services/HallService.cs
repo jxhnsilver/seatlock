@@ -69,6 +69,22 @@ namespace Seating.Api.Services
             ).ToList();
         }
 
+        public async Task<IReadOnlyList<HallDto>> GetActiveAsync(CancellationToken cancellationToken = default)
+        {
+            var halls = await _db.Halls
+                .AsNoTracking()
+                .Where(h => h.Status == HallStatus.Active)
+                .OrderBy(h => h.Id)
+                .ToListAsync(cancellationToken);
+
+            return halls.Select(h => new HallDto(
+                h.Id,
+                h.Name,
+                h.Type,
+                h.Status)
+            ).ToList();
+        }
+
         public async Task<HallDto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var hall = await _db.Halls

@@ -25,11 +25,20 @@ namespace Seating.Api.Services
             return hall.Id;
         }
 
-        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(
+            int id,
+            UpdateHallDto updateHallDto,
+            CancellationToken cancellationToken = default)
         {
-            await _db.Halls
-                .Where(h => h.Id == id)
-                .ExecuteDeleteAsync(cancellationToken);
+            var hall = await _db.Halls
+                .FirstOrDefaultAsync(h => h.Id == id, cancellationToken)
+                ?? throw new NotFoundException($"Hall with id {id} not found.");
+
+            hall.SetName(updateHallDto.Name);
+            hall.SetType(updateHallDto.Type);
+
+            await _db.SaveChangesAsync(cancellationToken);
+        }
         }
 
         public async Task<IReadOnlyList<HallDto>> GetAllAsync(CancellationToken cancellationToken = default)

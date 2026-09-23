@@ -5,29 +5,71 @@ services:
       dockerfile: ./src/Seating.Api/Dockerfile
     image: seating-api:local
     ports:
-      - "8080:8080"
+      - "8090:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__DefaultConnection: Host=seating-db;Port=5432;Database=${SEATING_DB_NAME};Username=${SEATING_DB_USER};Password=${SEATING_DB_PASSWORD}
+    networks:
+      - seating-network
+      - services-network
     depends_on:
-      postgres:
+      seating-db:
         condition: service_healthy
 
-  postgres:
+  seating-db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${SEATING_DB_USER}
+      POSTGRES_PASSWORD: ${SEATING_DB_PASSWORD}
+      POSTGRES_DB: ${SEATING_DB_NAME}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - seating-db-data:/var/lib/postgresql/data
+    networks:
+      - seating-network
     healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
+      test: ["CMD-SHELL", "pg_isready -U ${SEATING_DB_USER} -d ${SEATING_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  screening-api:
+    build:
+      context: .
+      dockerfile: ./src/Screening.Api/Dockerfile
+    image: screening-api:local
+    ports:
+      - "8091:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__DefaultConnection: Host=screening-db;Port=5432;Database=${SCREENING_DB_NAME};Username=${SCREENING_DB_USER};Password=${SCREENING_DB_PASSWORD}
+    networks:
+      - screening-network
+      - services-network
+    depends_on:
+      screening-db:
+        condition: service_healthy
+
+  screening-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${SCREENING_DB_USER}
+      POSTGRES_PASSWORD: ${SCREENING_DB_PASSWORD}
+      POSTGRES_DB: ${SCREENING_DB_NAME}
+    volumes:
+      - screening-db-data:/var/lib/postgresql/data
+    networks:
+      - screening-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SCREENING_DB_USER} -d ${SCREENING_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  seating-network:
+  screening-network:
+  services-network:
 
 volumes:
-  pgdata:
+  seating-db-data:
+  screening-db-data:

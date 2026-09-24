@@ -1,10 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/BuildingBlocks/BuildingBlocks.csproj" Id="f6a78f8e-385a-4993-b016-821d51769707" />
-    <Project Path="src/Screening.Api/Screening.Api.csproj" Id="2401bacd-a13b-48e4-9612-60b36d18f4ff" />
+    <Project Path="src/Screenings.Api/Screenings.Api.csproj" Id="2401bacd-a13b-48e4-9612-60b36d18f4ff" />
     <Project Path="src/Seating.Api/Seating.Api.csproj" Id="c5dc550e-bae1-4fed-a307-dd13a5beaedd" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Seating.Api.UnitTests/Seating.Api.UnitTests.csproj" Id="9413d0ff-f921-4a79-b71a-ff31b26cea54" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>

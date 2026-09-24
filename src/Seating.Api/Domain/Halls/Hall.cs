@@ -1,4 +1,6 @@
-﻿namespace Seating.Api.Domain.Halls
+﻿using BuildingBlocks.Exceptions;
+
+namespace Seating.Api.Domain.Halls
 {
     /// <summary>
     /// Доменная сущность кинозала.
@@ -28,7 +30,7 @@
         public Hall(string name, HallType type)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Название зала не может быть пустым.", nameof(name));
+                throw new InvariantViolationException("Название зала не может быть пустым.");
 
             Name = name;
             Type = type;
@@ -42,7 +44,7 @@
         public void SetName(string newName)
         {
             if (string.IsNullOrWhiteSpace(newName))
-                throw new ArgumentException("Название зала не может быть пустым.", nameof(newName));
+                throw new InvariantViolationException("Название зала не может быть пустым.");
 
             Name = newName;
         }

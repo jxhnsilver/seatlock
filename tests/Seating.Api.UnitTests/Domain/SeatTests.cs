@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using BuildingBlocks.Exceptions;
+using FluentAssertions;
 using Seating.Api.Domain.Seats;
 
 namespace Seating.Api.UnitTests.Domain
@@ -38,9 +39,8 @@ namespace Seating.Api.UnitTests.Domain
             Action act = () => _ = new Seat(invalidHallId, rowNumber, seatNumber, type);
 
             // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithMessage("*Идентификатор зала должен быть больше нуля.*")
-                .And.ParamName.Should().Be("hallId");
+            act.Should().Throw<InvariantViolationException>()
+                .WithMessage("*Идентификатор зала должен быть больше нуля.*");
         }
 
         [Theory]
@@ -57,9 +57,8 @@ namespace Seating.Api.UnitTests.Domain
             Action act = () => _ = new Seat(hallId, invalidRowNumber, seatNumber, type);
 
             // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithMessage("*Номер ряда должен быть больше нуля.*")
-                .And.ParamName.Should().Be("rowNumber");
+            act.Should().Throw<InvariantViolationException>()
+                .WithMessage("*Номер ряда должен быть больше нуля.*");
         }
 
         [Theory]
@@ -76,9 +75,8 @@ namespace Seating.Api.UnitTests.Domain
             Action act = () => _ = new Seat(hallId, rowNumber, invalidSeatNumber, type);
 
             // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithMessage("*Номер места должен быть больше нуля.*")
-                .And.ParamName.Should().Be("seatNumber");
+            act.Should().Throw<InvariantViolationException>()
+                .WithMessage("*Номер места должен быть больше нуля.*");
         }
     }
 }

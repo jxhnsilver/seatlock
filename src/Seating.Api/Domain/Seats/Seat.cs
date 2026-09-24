@@ -1,4 +1,6 @@
-﻿namespace Seating.Api.Domain.Seats
+﻿using BuildingBlocks.Exceptions;
+
+namespace Seating.Api.Domain.Seats
 {
     /// <summary>
     /// Посадочное место в кинозале.
@@ -33,13 +35,13 @@
         public Seat(int hallId, int rowNumber, int seatNumber, SeatType type)
         {
             if (hallId <= 0)
-                throw new ArgumentException("Идентификатор зала должен быть больше нуля.", nameof(hallId));
+                throw new InvariantViolationException("Идентификатор зала должен быть больше нуля.");
 
             if (rowNumber <= 0)
-                throw new ArgumentException("Номер ряда должен быть больше нуля.", nameof(rowNumber));
+                throw new InvariantViolationException("Номер ряда должен быть больше нуля.");
 
             if (seatNumber <= 0)
-                throw new ArgumentException("Номер места должен быть больше нуля.", nameof(seatNumber));
+                throw new InvariantViolationException("Номер места должен быть больше нуля.");
 
             HallId = hallId;
             RowNumber = rowNumber;

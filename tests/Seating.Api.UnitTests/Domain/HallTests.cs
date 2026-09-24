@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using BuildingBlocks.Exceptions;
+using FluentAssertions;
 using Seating.Api.Domain.Halls;
 
 namespace Seating.Api.UnitTests.Domain
@@ -34,9 +35,8 @@ namespace Seating.Api.UnitTests.Domain
             Action act = () => _ = new Hall(invalidName, type);
 
             // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithMessage("*Название зала не может быть пустым.*")
-                .And.ParamName.Should().Be("name"); ;
+            act.Should().Throw<InvariantViolationException>()
+                .WithMessage("*Название зала не может быть пустым.*");
         }
 
         [Fact]
@@ -66,9 +66,8 @@ namespace Seating.Api.UnitTests.Domain
             Action act = () => hall.SetName(invalidName);
 
             // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithMessage("*Название зала не может быть пустым.*")
-                .And.ParamName.Should().Be("newName"); ;
+            act.Should().Throw<InvariantViolationException>()
+                .WithMessage("*Название зала не может быть пустым.*");
         }
 
         [Fact]
